@@ -1,5 +1,8 @@
 pub mod fetcher;
 pub mod models;
+pub mod processor;
+pub mod db;
+pub mod pipeline;
 
 
 
