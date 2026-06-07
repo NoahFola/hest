@@ -14,8 +14,8 @@ struct PlayerHistoryResponse {
 }
 
 #[derive(Debug)]
-struct Fetcher{
-    http_client: reqwest::Client,
+pub struct Fetcher{
+    pub http_client: reqwest::Client,
     //db: DatabaseConnection
 }
 
@@ -33,7 +33,7 @@ impl Fetcher {
 
 
 
-    async fn fetch_player_history(&self, player_id: u32) -> Result<Vec<RawGameweekRow> , Box<dyn std::error::Error>>{
+    pub async fn fetch_player_history(&self, player_id: u32) -> Result<Vec<RawGameweekRow> , Box<dyn std::error::Error>>{
         let result: reqwest::Response= self.http_client.get(format!("https://fantasy.premierleague.com/api/element-summary/{}/", player_id)).send().await?;
         let mut final_result : PlayerHistoryResponse = result.json().await?;
         return Ok(final_result.history)

@@ -2,7 +2,7 @@ use core::f32;
 
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawPlayer {
     pub id: u32,
     pub first_name: String, 
@@ -13,7 +13,7 @@ pub struct RawPlayer {
     pub minutes:u32
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct RawGameweekRow {
     pub element: u32,
     pub round: u32,
@@ -44,25 +44,63 @@ pub struct ProcessedPlayerRow {
     pub element: u32,
     pub round: u32,
     pub kickoff_time: String,
-    pub minutes: u32,
-    pub goals_scored: u32,
-    pub assists: u32,
-    pub clean_sheets: u32,
-    pub saves: u32,
-    pub yellow_cards: u32,
-    pub red_cards: u32,
-    pub bonus: u32,
-    pub was_home: bool,
     pub total_points: i32,
-    pub influence: String,
-    pub creativity: String,
-    pub threat: String,
-    pub ict_index: String,
-    pub expected_goals: String,
-    pub expected_assists: String,
-    pub expected_goal_involvements: String,
+    pub was_home: bool,
     pub starts: u32,
+    pub avg_fpl_last3: f32,
+    pub avg_minutes_last3: f32,
+    pub avg_goals_last3: f32,
+    pub avg_assists_last3: f32,
+    pub avg_clean_sheets_last3: f32,
+    pub avg_saves_last3: f32,
+    pub avg_bonus_last3: f32,
+    pub avg_ict_last3: f32,
+    pub avg_xgi_last3: f32,
     pub avg_fpl_last5: f32,
-    pub avg_goals_last5: f32,
     pub avg_minutes_last5: f32,
+    pub avg_goals_last5: f32,
+    pub avg_assists_last5: f32,
+    pub avg_clean_sheets_last5: f32,
+    pub avg_saves_last5: f32,
+    pub avg_bonus_last5: f32,
+    pub avg_ict_last5: f32,
+    pub avg_xgi_last5: f32,
+    pub avg_fpl_season: f32,
+    pub avg_minutes_season: f32,
+    pub avg_goals_season: f32,
+    pub avg_assists_season: f32,
+    pub avg_clean_sheets_season: f32,
+    pub avg_saves_season: f32,
+    pub avg_bonus_season: f32,
+    pub avg_ict_season: f32,
+    pub avg_xgi_season: f32,
+    pub rest_days: u32,
+    pub games_played: u32,
 }
+// #[derive(Deserialize, Debug)]
+// pub struct ProcessedPlayerRow {
+//     pub element: u32,
+//     pub round: u32,
+//     pub kickoff_time: String,
+//     pub minutes: u32,
+//     pub goals_scored: u32,
+//     pub assists: u32,
+//     pub clean_sheets: u32,
+//     pub saves: u32,
+//     pub yellow_cards: u32,
+//     pub red_cards: u32,
+//     pub bonus: u32,
+//     pub was_home: bool,
+//     pub total_points: i32,
+//     pub influence: String,
+//     pub creativity: String,
+//     pub threat: String,
+//     pub ict_index: String,
+//     pub expected_goals: String,
+//     pub expected_assists: String,
+//     pub expected_goal_involvements: String,
+//     pub starts: u32,
+//     pub avg_fpl_last5: f32,
+//     pub avg_goals_last5: f32,
+//     pub avg_minutes_last5: f32,
+// }

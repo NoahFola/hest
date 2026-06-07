@@ -2,18 +2,18 @@ use rusqlite;
 
 use crate::models::{ProcessedPlayerRow, RawPlayer};
 
-struct DbHandler{
+pub struct DbHandler{
     conn: rusqlite::Connection
 }
 impl DbHandler{
-    fn new() -> Result<Self>{
+    pub fn new(r:String) -> Result<Self,Box<dyn std::error::Error>>{
         
-        let temp: rusqlite::Connection = rusqlite::Connection::open("../data/hest.db")?;
+        let temp: rusqlite::Connection = rusqlite::Connection::open(format!("data/{}.db", r))?;
         let new: DbHandler = DbHandler { conn: (temp) };
         return Ok(new);
     }
 
-    fn setup_tables(&self) -> Result<()> {
+    pub  fn setup_tables(&self) -> Result<(),Box<dyn std::error::Error>> {
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS players (
                 id INTEGER PRIMARY KEY,
@@ -24,8 +24,8 @@ impl DbHandler{
                 element_type INTEGER NOT NULL,
                 minutes INTEGER NOT NULL
             )",
-            [],
-        )?;
+            rusqlite::params![],
+        )?; 
 
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS gameweek_stats (
@@ -66,13 +66,13 @@ impl DbHandler{
                 games_played INTEGER NOT NULL,
                 FOREIGN KEY (element) REFERENCES players(id)
             )",
-            [],
+            rusqlite::params![],
         )?;
 
         Ok(())
     }
 
-    fn write_player(&self, r: RawPlayer) -> Result<()> {
+    pub fn write_player(&self, r: RawPlayer) -> Result<(),Box<dyn std::error::Error>> {
         self.conn.execute(
             "INSERT INTO players (id, first_name, second_name, web_name, team, element_type, minutes)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
@@ -81,7 +81,7 @@ impl DbHandler{
         Ok(())
     }
 
-    fn write_processed_player(&self, p: ProcessedPlayerRow) -> Result<()> {
+    pub fn write_processed_player(&self, p: ProcessedPlayerRow) -> Result<(),Box<dyn std::error::Error>> {
         self.conn.execute(
             "INSERT INTO gameweek_stats (
                 element, round, kickoff_time, total_points, was_home, starts,
@@ -99,13 +99,13 @@ impl DbHandler{
                 ?31, ?32, ?33, ?34, ?35
             )",
             rusqlite::params![
-                p.element, p.round, p.kickoff_time, p.total_points, p.was_home, p.starts,
-                p.avg_fpl_last3, p.avg_minutes_last3, p.avg_goals_last3, p.avg_assists_last3,
-                p.avg_clean_sheets_last3, p.avg_saves_last3, p.avg_bonus_last3, p.avg_ict_last3, p.avg_xgi_last3,
-                p.avg_fpl_last5, p.avg_minutes_last5, p.avg_goals_last5, p.avg_assists_last5,
-                p.avg_clean_sheets_last5, p.avg_saves_last5, p.avg_bonus_last5, p.avg_ict_last5, p.avg_xgi_last5,
-                p.avg_fpl_season, p.avg_minutes_season, p.avg_goals_season, p.avg_assists_season,
-                p.avg_clean_sheets_season, p.avg_saves_season, p.avg_bonus_season, p.avg_ict_season, p.avg_xgi_season,
+                p.element, p.round, p.kickoff_time, p.total_points, p.was_home as i32, p.starts,
+                p.avg_fpl_last3 as f64, p.avg_minutes_last3 as f64, p.avg_goals_last3 as f64, p.avg_assists_last3 as f64,
+                p.avg_clean_sheets_last3 as f64, p.avg_saves_last3 as f64, p.avg_bonus_last3 as f64, p.avg_ict_last3 as f64, p.avg_xgi_last3 as f64,
+                p.avg_fpl_last5 as f64, p.avg_minutes_last5 as f64, p.avg_goals_last5 as f64, p.avg_assists_last5 as f64,
+                p.avg_clean_sheets_last5 as f64, p.avg_saves_last5 as f64, p.avg_bonus_last5 as f64, p.avg_ict_last5 as f64, p.avg_xgi_last5 as f64,
+                p.avg_fpl_season as f64, p.avg_minutes_season as f64, p.avg_goals_season as f64, p.avg_assists_season as f64,
+                p.avg_clean_sheets_season as f64, p.avg_saves_season as f64, p.avg_bonus_season as f64, p.avg_ict_season as f64, p.avg_xgi_season as f64,
                 p.rest_days, p.games_played
             ],
         )?;
@@ -114,4 +114,3 @@ impl DbHandler{
 
 }
 
-pub static DB_HANDLE: DbHandler = DbHandler::new();
