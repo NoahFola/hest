@@ -68,10 +68,31 @@ impl DbHandler{
             )",
             rusqlite::params![],
         )?;
+        
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS predictions (
+                player_id INTEGER NOT NULL,
+                gameweek INTEGER NOT NULL,
+                predicted_points REAL NOT NULL,
+                predicted_at TEXT NOT NULL,
+                FOREIGN KEY (player_id) REFERENCES players(id)
+            )",
+            rusqlite::params![],
+        )?; 
 
         Ok(())
     }
-
+    
+    pub fn write_prediction(&self, player_id: u32, gameweek: u32, predicted_points: f64) -> Result<(), Box<dyn std::error::Error>> {
+        let predicted_at = chrono::Utc::now().to_rfc3339();
+        self.conn.execute(
+            "INSERT INTO predictions (player_id, gameweek, predicted_points, predicted_at)
+            VALUES (?1, ?2, ?3, ?4)",
+            rusqlite::params![player_id, gameweek, predicted_points, predicted_at],
+        )?;
+        Ok(())
+    }
+    
     pub fn write_player(&self, r: RawPlayer) -> Result<(),Box<dyn std::error::Error>> {
         self.conn.execute(
             "INSERT INTO players (id, first_name, second_name, web_name, team, element_type, minutes)
@@ -112,5 +133,62 @@ impl DbHandler{
         Ok(())
     }
 
+    pub fn read_latest_features(&self, player_id: u32) -> Result<ProcessedPlayerRow, Box<dyn std::error::Error>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT * FROM gameweek_stats
+            WHERE element = ?1
+            ORDER BY round DESC
+            LIMIT 1"
+        )?;
+
+        let row = stmt.query_row(rusqlite::params![player_id], |row| {
+            Ok(ProcessedPlayerRow {
+                element: row.get(0)?,
+                round: row.get(1)?,
+                kickoff_time: row.get(2)?,
+                total_points: row.get(3)?,
+                was_home: row.get::<_, i32>(4)? != 0,
+                starts: row.get(5)?,
+                avg_fpl_last3: row.get(6)?,
+                avg_minutes_last3: row.get(7)?,
+                avg_goals_last3: row.get(8)?,
+                avg_assists_last3: row.get(9)?,
+                avg_clean_sheets_last3: row.get(10)?,
+                avg_saves_last3: row.get(11)?,
+                avg_bonus_last3: row.get(12)?,
+                avg_ict_last3: row.get(13)?,
+                avg_xgi_last3: row.get(14)?,
+                avg_fpl_last5: row.get(15)?,
+                avg_minutes_last5: row.get(16)?,
+                avg_goals_last5: row.get(17)?,
+                avg_assists_last5: row.get(18)?,
+                avg_clean_sheets_last5: row.get(19)?,
+                avg_saves_last5: row.get(20)?,
+                avg_bonus_last5: row.get(21)?,
+                avg_ict_last5: row.get(22)?,
+                avg_xgi_last5: row.get(23)?,
+                avg_fpl_season: row.get(24)?,
+                avg_minutes_season: row.get(25)?,
+                avg_goals_season: row.get(26)?,
+                avg_assists_season: row.get(27)?,
+                avg_clean_sheets_season: row.get(28)?,
+                avg_saves_season: row.get(29)?,
+                avg_bonus_season: row.get(30)?,
+                avg_ict_season: row.get(31)?,
+                avg_xgi_season: row.get(32)?,
+                rest_days: row.get(33)?,
+                games_played: row.get(34)?,
+            })
+        })?;
+
+        Ok(row)
+    }
+
+    pub fn read_all_player_ids(&self) -> Result<Vec<u32>, Box<dyn std::error::Error>> {
+        let mut stmt = self.conn.prepare("SELECT id FROM players")?;
+        let ids = stmt.query_map(rusqlite::params![], |row| row.get(0))?
+            .collect::<Result<Vec<u32>, _>>()?;
+        Ok(ids)
+    }
 }
 
